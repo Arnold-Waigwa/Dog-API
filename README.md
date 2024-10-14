@@ -43,6 +43,7 @@ GIF created with licecap
 ## Notes
 
 Describe any challenges encountered while building the app.
+I had a hard time figuring out how to ensure the data resets after refreshing or on mounting the website. Turns out, I wasn't supposed to use useEffect in this case. Got to learn a lot about useeffect
 
 ## License
 

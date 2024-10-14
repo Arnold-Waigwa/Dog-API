@@ -6,6 +6,7 @@ const ACCESS_KEY = import.meta.env.VITE_API_KEY;
 
 function App() {
   const [catData, setCatData] = useState(null);
+  const [banned, setBanned] = useState([]);
   const query = `https://api.thecatapi.com/v1/images/search?size=med&mime_types=jpg&format=json&has_breeds=true&order=RANDOM&page=0&limit=1&api_key=live_B1lsNHKvsj9DwVdRNWfY6S4gKjuhSENKFZ4CxvNQEqT5IS9k3m4nl4aFICrANWVw`;
 
   const apiCall = async (query) => {
@@ -25,24 +26,42 @@ function App() {
           weight: breed?.weight?.imperial || "Unknown weight",
           temperament: breed?.temperament || "Unknown temperament",
           lifeSpan: breed?.life_span || "Unknown lifespan",
-          description: breed?.description || "No description available",
         };
-        setCatData(catInfo);
+
+        const isBanned = [
+          catInfo.breed,
+          catInfo.weight,
+          catInfo.origin,
+          catInfo.lifeSpan,
+          catInfo.temperament,
+        ].some((attr) => banned.includes(attr));
+
+        if (!isBanned) {
+          setCatData(catInfo);
+        } else {
+          apiCall(query);
+        }
       }
     } catch (error) {
       alert(`Error fetching data: ${error.message}`);
     }
   };
 
-  useEffect(() => {
-    setCatData(null);
-    apiCall(query);
-  }, []); // The empty array ensures the effect runs only once, on mount.
+  const handleAttribute = (attribute) => {
+    setBanned((prevBanned) => [...prevBanned, attribute]);
+  };
+
+  const handleUnban = (attribute) => {
+    setBanned((prevBanned) => prevBanned.filter((item) => item !== attribute));
+  };
 
   return (
     <Hero
       catData={catData}
       handleClick={() => apiCall(query)} // Pass the query when calling the API
+      handleAttribute={handleAttribute}
+      banned={banned}
+      handleUnban={handleUnban}
     />
   );
 }
